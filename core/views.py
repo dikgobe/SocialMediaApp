@@ -1,5 +1,7 @@
-from django.shortcuts import render
+from django.shortcuts import render ,redirect
 from django.http import HttpResponse
+from django.contrib.auth.models import User, auth #will be used in the sign up to check if the user and the email exist
+from django.contrib import messages
 
 # Create your views here.
 def index(request):
@@ -8,7 +10,26 @@ def index(request):
 def signup(request):
 
 	if request.method == 'POST':
-		pass
+		username= request.POST['username']
+		email = request.POST["email"]
+		password= request.POST["password"]
+		password2=request.POST["password2"]
+		print(username , email , password ,password2 )
+
+		if password==password2:
+			if User.objects.filter(email=email).exists():
+				messages.info(request, 'Email already exists')
+				return redirect('signup')
+			elif User.objects.filter(username=username).exists():
+				messages.info(request, "Username already exist")
+				return redirect('signup')
+			else:
+				user = User.objects.create_user(username=username, email = email ,password =password )
+				user.save()
+			
+		else:
+			messages.info(request, 'Password does not match')
+			return redirect('signup')
+
 	else:
-		pass
-	return render(request, 'signup.html')
+		return render(request, 'signup.html')
